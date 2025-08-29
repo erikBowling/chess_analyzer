@@ -67,6 +67,9 @@ impl Board {
             board.push(row);
         }
 
+        // Places white pieces at the bottom of the board
+        board.reverse();
+
         Board {
             squares: board
         }

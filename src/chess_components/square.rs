@@ -96,8 +96,8 @@ impl Square {
         &self.location
     }
 
-    pub fn piece(&self) -> &Option<Piece> {
-        &self.piece
+    pub fn piece(&self) -> Option<&Piece> {
+        self.piece.as_ref()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -105,5 +105,13 @@ impl Square {
             Some(_) => false,
             None => true,
         }
+    }
+
+    pub fn rank(&self) -> &Rank {
+        &self.location.rank
+    }
+
+    pub fn file(&self) -> &File {
+        &self.location.file
     }
 }

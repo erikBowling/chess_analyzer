@@ -9,8 +9,6 @@ pub struct ChessBoardComponent {
     board: Board,
     piece_textures: HashMap<&'static str, &'static str>,
     square_size: f32,
-    auto_resize: bool,
-    grid: egui::Grid,
 }
 
 impl ChessBoardComponent {
@@ -30,18 +28,10 @@ impl ChessBoardComponent {
             ("pawn-b", "pieces/pawn-b.svg"),
         ]);
 
-        let grid = egui::Grid::new("chess_board")
-                .num_columns(8)
-                .spacing([0.0, 0.0])
-                .min_col_width(60.0)
-                .min_row_height(60.0);
-
         Self {
             board: Board::new(),
             piece_textures: piece_textures,
             square_size: 60.0,
-            auto_resize: true,
-            grid: grid
         }
     }
 
@@ -63,7 +53,7 @@ impl ChessBoardComponent {
         format!("{}-{}", piece_name, color_suffix)
     }
 
-    fn is_light_square(&self, rank: Rank, file: File) -> bool {
+    fn is_light_square(&self, rank: &Rank, file: &File) -> bool {
         (rank.to_int() + file.to_int()) % 2 == 1
     }
 
@@ -73,6 +63,47 @@ impl ChessBoardComponent {
 
 
     pub fn show(&self, ui: &mut egui::Ui) {
+        let grid = egui::Grid::new("chess_board")
+                .num_columns(8)
+                .spacing([0.0, 0.0])
+                .min_col_width(self.square_size)
+                .min_row_height(self.square_size);
 
+        grid.show(ui, |ui| {
+            for row in &self.board.squares{
+                for square in row {
+                    let rank = square.rank();
+                    let file = square.file();
+                    let square_color = if self.is_light_square(rank, file) {
+                        egui::Color32::from_rgb(240, 217, 181) // Light brown
+                    } else {
+                        egui::Color32::from_rgb(181, 136, 99)  // Dark brown
+                    };
+
+                    // Use click_and_drag to handle both interactions
+                    let (rect, response) = ui.allocate_exact_size(
+                        egui::vec2(self.square_size, self.square_size),
+                        egui::Sense::click_and_drag()  // This enables both click and drag
+                    );
+
+                    // Paint the square
+                    ui.painter().rect_filled(rect, 0.0, square_color);
+
+                    // Draw piece if present
+                    if let Some(piece) = square.piece() {
+                        let piece_key = self.get_piece_image_key(piece);
+                        ui.painter().text(
+                            rect.center(),
+                            egui::Align2::CENTER_CENTER,
+                            &piece_key,
+                            egui::FontId::proportional(10.0),
+                            egui::Color32::BLACK,
+                        );
+                    }
+                }
+
+                ui.end_row();
+            }
+        });
     }
 }
