@@ -1,94 +1,74 @@
-use crate::chess_components::piece::{Piece, PieceType, Color};
-use crate::chess_components::square::{Square, Location, Rank, File};
+use crate::chess_components::piece::{Color, Piece, PieceType};
+use crate::chess_components::square::{File, Rank, Square};
 use strum::IntoEnumIterator;
 
 pub struct Board {
-    pub squares: Vec<Vec<Square>>,
+    squares: Vec<Square>,
 }
 
 impl Board {
     pub fn new() -> Self {
-        let mut board = Vec::new();
+        // Capacity of 64 squares 8x8
+        let mut board = Vec::with_capacity(64);
+
         for rank in Rank::iter() {
-            let mut row = Vec::new();
-            match rank {
-                Rank::One => {
-                    row.push(Square::new(Location::new(Rank::One, File::A), Some(Piece::new(PieceType::Rook, Color::White))));
-                    row.push(Square::new(Location::new(Rank::One, File::B), Some(Piece::new(PieceType::Knight, Color::White))));
-                    row.push(Square::new(Location::new(Rank::One, File::C), Some(Piece::new(PieceType::Bishop, Color::White))));
-                    row.push(Square::new(Location::new(Rank::One, File::D), Some(Piece::new(PieceType::Queen, Color::White))));
-                    row.push(Square::new(Location::new(Rank::One, File::E), Some(Piece::new(PieceType::King, Color::White))));
-                    row.push(Square::new(Location::new(Rank::One, File::F), Some(Piece::new(PieceType::Bishop, Color::White))));
-                    row.push(Square::new(Location::new(Rank::One, File::G), Some(Piece::new(PieceType::Knight, Color::White))));
-                    row.push(Square::new(Location::new(Rank::One, File::H), Some(Piece::new(PieceType::Rook, Color::White))));
+            for file in File::iter() {
+                let mut square = Square::new(rank, file, None);
+
+                match square.rank() {
+                    Rank::One => match square.file() {
+                        File::A => square.set_piece(Piece::new(PieceType::Rook, Color::White)),
+                        File::B => square.set_piece(Piece::new(PieceType::Knight, Color::White)),
+                        File::C => square.set_piece(Piece::new(PieceType::Bishop, Color::White)),
+                        File::D => square.set_piece(Piece::new(PieceType::Queen, Color::White)),
+                        File::E => square.set_piece(Piece::new(PieceType::King, Color::White)),
+                        File::F => square.set_piece(Piece::new(PieceType::Bishop, Color::White)),
+                        File::G => square.set_piece(Piece::new(PieceType::Knight, Color::White)),
+                        File::H => square.set_piece(Piece::new(PieceType::Rook, Color::White)),
+                    },
+                    Rank::Two => {
+                        square.set_piece(Piece::new(PieceType::Pawn, Color::White));
+                    }
+                    Rank::Seven => {
+                        square.set_piece(Piece::new(PieceType::Pawn, Color::Black));
+                    }
+                    Rank::Eight => match square.file() {
+                        File::A => square.set_piece(Piece::new(PieceType::Rook, Color::Black)),
+                        File::B => square.set_piece(Piece::new(PieceType::Knight, Color::Black)),
+                        File::C => square.set_piece(Piece::new(PieceType::Bishop, Color::Black)),
+                        File::D => square.set_piece(Piece::new(PieceType::Queen, Color::Black)),
+                        File::E => square.set_piece(Piece::new(PieceType::King, Color::Black)),
+                        File::F => square.set_piece(Piece::new(PieceType::Bishop, Color::Black)),
+                        File::G => square.set_piece(Piece::new(PieceType::Knight, Color::Black)),
+                        File::H => square.set_piece(Piece::new(PieceType::Rook, Color::Black)),
+                    },
+                    _ => {}
                 }
-                Rank::Two => {
-                    row.push(Square::new(Location::new(Rank::Two, File::A), Some(Piece::new(PieceType::Pawn, Color::White))));
-                    row.push(Square::new(Location::new(Rank::Two, File::B), Some(Piece::new(PieceType::Pawn, Color::White))));
-                    row.push(Square::new(Location::new(Rank::Two, File::C), Some(Piece::new(PieceType::Pawn, Color::White))));
-                    row.push(Square::new(Location::new(Rank::Two, File::D), Some(Piece::new(PieceType::Pawn, Color::White))));
-                    row.push(Square::new(Location::new(Rank::Two, File::E), Some(Piece::new(PieceType::Pawn, Color::White))));
-                    row.push(Square::new(Location::new(Rank::Two, File::F), Some(Piece::new(PieceType::Pawn, Color::White))));
-                    row.push(Square::new(Location::new(Rank::Two, File::G), Some(Piece::new(PieceType::Pawn, Color::White))));
-                    row.push(Square::new(Location::new(Rank::Two, File::H), Some(Piece::new(PieceType::Pawn, Color::White))));
-                }
-                Rank::Seven => {
-                    row.push(Square::new(Location::new(Rank::Seven, File::A), Some(Piece::new(PieceType::Pawn, Color::Black))));
-                    row.push(Square::new(Location::new(Rank::Seven, File::B), Some(Piece::new(PieceType::Pawn, Color::Black))));
-                    row.push(Square::new(Location::new(Rank::Seven, File::C), Some(Piece::new(PieceType::Pawn, Color::Black))));
-                    row.push(Square::new(Location::new(Rank::Seven, File::D), Some(Piece::new(PieceType::Pawn, Color::Black))));
-                    row.push(Square::new(Location::new(Rank::Seven, File::E), Some(Piece::new(PieceType::Pawn, Color::Black))));
-                    row.push(Square::new(Location::new(Rank::Seven, File::F), Some(Piece::new(PieceType::Pawn, Color::Black))));
-                    row.push(Square::new(Location::new(Rank::Seven, File::G), Some(Piece::new(PieceType::Pawn, Color::Black))));
-                    row.push(Square::new(Location::new(Rank::Seven, File::H), Some(Piece::new(PieceType::Pawn, Color::Black))));
-                }
-                Rank::Eight => {
-                    row.push(Square::new(Location::new(Rank::Eight, File::A), Some(Piece::new(PieceType::Rook, Color::Black))));
-                    row.push(Square::new(Location::new(Rank::Eight, File::B), Some(Piece::new(PieceType::Knight, Color::Black))));
-                    row.push(Square::new(Location::new(Rank::Eight, File::C), Some(Piece::new(PieceType::Bishop, Color::Black))));
-                    row.push(Square::new(Location::new(Rank::Eight, File::D), Some(Piece::new(PieceType::Queen, Color::Black))));
-                    row.push(Square::new(Location::new(Rank::Eight, File::E), Some(Piece::new(PieceType::King, Color::Black))));
-                    row.push(Square::new(Location::new(Rank::Eight, File::F), Some(Piece::new(PieceType::Bishop, Color::Black))));
-                    row.push(Square::new(Location::new(Rank::Eight, File::G), Some(Piece::new(PieceType::Knight, Color::Black))));
-                    row.push(Square::new(Location::new(Rank::Eight, File::H), Some(Piece::new(PieceType::Rook, Color::Black))));
-                }
-                _ => {
-                    row.push(Square::new(Location::new(rank, File::A), None));
-                    row.push(Square::new(Location::new(rank, File::B), None));
-                    row.push(Square::new(Location::new(rank, File::C), None));
-                    row.push(Square::new(Location::new(rank, File::D), None));
-                    row.push(Square::new(Location::new(rank, File::E), None));
-                    row.push(Square::new(Location::new(rank, File::F), None));
-                    row.push(Square::new(Location::new(rank, File::G), None));
-                    row.push(Square::new(Location::new(rank, File::H), None));
-                }
+                board.push(square)
             }
-
-            board.push(row);
         }
 
-        // Places white pieces at the bottom of the board
-        board.reverse();
-
-        Board {
-            squares: board
-        }
+        println!("Board initialized with {} squares", board.len());
+        Self { squares: board }
     }
 
-    pub fn squares(&self) -> &Vec<Vec<Square>> {
+    pub fn squares(&self) -> &Vec<Square> {
         &self.squares
     }
 
     pub fn to_fen_notation(&self) -> String {
         let mut fen_parts = Vec::new();
 
-        for rank in self.squares.iter() {
+        for rank in Rank::iter() {
             let mut rank_string = String::new();
             let mut empty_count = 0;
 
-            // Iterate through files A to H
-            for square in rank.iter() {
-                match square.piece() {
+            for square in self
+                .squares()
+                .iter()
+                .filter(|square| square.rank().to_int() == rank as u8)
+            {
+                match square.get_piece() {
                     Some(piece) => {
                         // If we had empty squares before this piece, add the count
                         if empty_count > 0 {
@@ -102,11 +82,13 @@ impl Board {
                         empty_count += 1;
                     }
                 }
-            }
 
-            // If the rank ends with empty squares, add the count
-            if empty_count > 0 {
-                rank_string.push_str(&empty_count.to_string());
+                // If the rank ends with empty squares, add the count
+                if empty_count > 0 {
+                    rank_string.push_str(&empty_count.to_string());
+                }
+
+                // If we're at the end of a rank, push the rank string to the parts vector
             }
 
             fen_parts.push(rank_string);
@@ -114,5 +96,42 @@ impl Board {
 
         fen_parts.reverse();
         fen_parts.join("/")
+    }
+
+    pub fn get_square(&self, rank: Rank, file: File) -> &Square {
+        match &self
+            .squares
+            .iter()
+            .filter(|square| {
+                square.rank().to_int() == rank as u8 && square.file().to_int() == file as u8
+            })
+            .next()
+        {
+            Some(square) => square,
+            None => panic!("Square not found"),
+        }
+    }
+
+    pub fn get_square_mut(&mut self, rank: Rank, file: File) -> &mut Square {
+        match self.squares.iter_mut().find(|square| {
+            square.rank().to_int() == rank as u8 && square.file().to_int() == file as u8
+        }) {
+            Some(square) => square,
+            None => panic!("Square not found at {:?}{:?}", file, rank),
+        }
+    }
+
+    pub fn move_piece(&mut self, from_square: &mut Square, to_square: &mut Square) {
+        // TODO: Check if the to_square has a piece
+        // If so, handle collision
+        match from_square.get_piece() {
+            Some(piece) => {
+                let new_piece = Piece::new(*piece.piece_type(), *piece.color());
+                from_square.clear_piece();
+
+                to_square.set_piece(new_piece);
+            }
+            None => {}
+        }
     }
 }

@@ -1,7 +1,7 @@
-use strum_macros::EnumIter;
 use crate::chess_components::piece::Piece;
+use strum_macros::EnumIter;
 
-#[derive(EnumIter, Copy, Clone)]
+#[derive(EnumIter, Copy, Clone, Debug)]
 pub enum Rank {
     One,
     Two,
@@ -37,81 +37,37 @@ impl File {
     }
 }
 
-pub struct Location {
+pub struct Square {
     rank: Rank,
     file: File,
-}
-
-impl Location {
-    pub fn new(rank: Rank, file: File) -> Self {
-        Location { rank, file }
-    }
-
-    pub fn rank(&self) -> u8 {
-        match self.rank {
-            Rank::One => 1,
-            Rank::Two => 2,
-            Rank::Three => 3,
-            Rank::Four => 4,
-            Rank::Five => 5,
-            Rank::Six => 6,
-            Rank::Seven => 7,
-            Rank::Eight => 8,
-        }
-    }
-
-    pub fn file(&self) -> String {
-        match self.file {
-            File::A => "a",
-            File::B => "b",
-            File::C => "c",
-            File::D => "d",
-            File::E => "e",
-            File::F => "f",
-            File::G => "g",
-            File::H => "h",
-        }
-        .to_string()
-    }
-
-    pub fn to_string(&self) -> String {
-        let rank = self.rank();
-        let file = self.file();
-
-        format!("{}{}", file, rank)
-    }
-}
-
-pub struct Square {
-    location: Location,
     piece: Option<Piece>,
 }
 
 impl Square {
-    pub fn new(location: Location, piece: Option<Piece>) -> Self {
-        Square { location, piece }
+    pub fn new(rank: Rank, file: File, piece: Option<Piece>) -> Self {
+        Square { rank, file, piece }
     }
 
-    pub fn location(&self) -> &Location {
-        &self.location
-    }
-
-    pub fn piece(&self) -> Option<&Piece> {
-        self.piece.as_ref()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        match self.piece {
-            Some(_) => false,
-            None => true,
+    pub fn get_piece(&self) -> Option<&Piece> {
+        match &self.piece {
+            Some(piece) => Some(&piece),
+            None => None,
         }
     }
 
+    pub fn set_piece(&mut self, piece: Piece) {
+        self.piece = Some(piece);
+    }
+
+    pub fn clear_piece(&mut self) {
+        self.piece = None;
+    }
+
     pub fn rank(&self) -> &Rank {
-        &self.location.rank
+        &self.rank
     }
 
     pub fn file(&self) -> &File {
-        &self.location.file
+        &self.file
     }
 }

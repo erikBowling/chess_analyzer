@@ -1,5 +1,5 @@
-use eframe::egui;
 use super::chess_board::ChessBoardComponent;
+use eframe::egui;
 
 #[derive(PartialEq)]
 enum AppView {
@@ -14,10 +14,10 @@ pub struct ChessAnalyzerApp {
 }
 
 impl ChessAnalyzerApp {
-    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+    pub fn new() -> Self {
         Self {
             current_view: AppView::Home,
-            chess_board: ChessBoardComponent::new(cc),
+            chess_board: ChessBoardComponent::new(),
         }
     }
 
@@ -53,7 +53,7 @@ impl ChessAnalyzerApp {
     }
 
     fn show_chess_board(&mut self, ui: &mut egui::Ui) {
-        self.chess_board.show(ui);
+        self.chess_board.draw(ui);
         ui.vertical_centered(|ui| {
             ui.add_space(50.0);
             ui.heading("Chess Analyzer");
@@ -91,12 +91,10 @@ impl eframe::App for ChessAnalyzerApp {
             self.show_main_menu(ui);
         });
 
-        egui::CentralPanel::default().show(ctx, |ui| {
-            match self.current_view {
-                AppView::Home => self.show_home_view(ui),
-                AppView::ChessBoard => self.show_chess_board(ui),
-                AppView::Analysis => self.show_analysis_view(ui),
-            }
+        egui::CentralPanel::default().show(ctx, |ui| match self.current_view {
+            AppView::Home => self.show_home_view(ui),
+            AppView::ChessBoard => self.show_chess_board(ui),
+            AppView::Analysis => self.show_analysis_view(ui),
         });
 
         // Optional: Add a bottom status bar
@@ -130,6 +128,9 @@ pub fn run_chess_gui() -> Result<(), eframe::Error> {
     eframe::run_native(
         "Chess Analyzer",
         options,
-        Box::new(|cc| Ok(Box::new(ChessAnalyzerApp::new(cc)))),
+        Box::new(|cc| {
+            egui_extras::install_image_loaders(&cc.egui_ctx);
+            Ok(Box::new(ChessAnalyzerApp::new()))
+        }),
     )
 }

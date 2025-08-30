@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum PieceType {
     Pawn,
     Knight,
@@ -8,7 +8,7 @@ pub enum PieceType {
     Queen,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum Color {
     White,
     Black,
@@ -63,6 +63,6 @@ impl Piece {
             },
         };
 
-    letter
+        letter
     }
 }
