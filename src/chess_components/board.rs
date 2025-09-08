@@ -1,59 +1,112 @@
 use crate::chess_components::piece::{Color, Piece, PieceType};
-use crate::chess_components::square::{File, Rank, Square};
+use std::collections::HashMap;
 use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
+
+#[derive(EnumIter, Copy, Clone, Debug, Hash, PartialEq, Eq)]
+pub enum Rank {
+    One,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+}
+
+impl Rank {
+    pub fn to_int(self) -> u8 {
+        self as u8
+    }
+}
+
+#[derive(EnumIter, Copy, Clone, Debug, Hash, PartialEq, Eq)]
+pub enum File {
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+}
+
+impl File {
+    pub fn to_int(self) -> u8 {
+        self as u8
+    }
+}
 
 pub struct Board {
-    squares: Vec<Square>,
+    pieces: HashMap<(Rank, File), Piece>,
 }
 
 impl Board {
     pub fn new() -> Self {
-        // Capacity of 64 squares 8x8
-        let mut board = Vec::with_capacity(64);
+        let mut pieces = HashMap::new();
 
         for rank in Rank::iter() {
             for file in File::iter() {
-                let mut square = Square::new(rank, file, None);
-
-                match square.rank() {
-                    Rank::One => match square.file() {
-                        File::A => square.set_piece(Piece::new(PieceType::Rook, Color::White)),
-                        File::B => square.set_piece(Piece::new(PieceType::Knight, Color::White)),
-                        File::C => square.set_piece(Piece::new(PieceType::Bishop, Color::White)),
-                        File::D => square.set_piece(Piece::new(PieceType::Queen, Color::White)),
-                        File::E => square.set_piece(Piece::new(PieceType::King, Color::White)),
-                        File::F => square.set_piece(Piece::new(PieceType::Bishop, Color::White)),
-                        File::G => square.set_piece(Piece::new(PieceType::Knight, Color::White)),
-                        File::H => square.set_piece(Piece::new(PieceType::Rook, Color::White)),
-                    },
+                match rank {
+                    Rank::One => {
+                        match file {
+                            File::A => pieces
+                                .insert((rank, file), Piece::new(PieceType::Rook, Color::White)),
+                            File::B => pieces
+                                .insert((rank, file), Piece::new(PieceType::Knight, Color::White)),
+                            File::C => pieces
+                                .insert((rank, file), Piece::new(PieceType::Bishop, Color::White)),
+                            File::D => pieces
+                                .insert((rank, file), Piece::new(PieceType::Queen, Color::White)),
+                            File::E => pieces
+                                .insert((rank, file), Piece::new(PieceType::King, Color::White)),
+                            File::F => pieces
+                                .insert((rank, file), Piece::new(PieceType::Bishop, Color::White)),
+                            File::G => pieces
+                                .insert((rank, file), Piece::new(PieceType::Knight, Color::White)),
+                            File::H => pieces
+                                .insert((rank, file), Piece::new(PieceType::Rook, Color::White)),
+                        };
+                    }
                     Rank::Two => {
-                        square.set_piece(Piece::new(PieceType::Pawn, Color::White));
+                        pieces.insert((rank, file), Piece::new(PieceType::Pawn, Color::White));
                     }
+
                     Rank::Seven => {
-                        square.set_piece(Piece::new(PieceType::Pawn, Color::Black));
+                        pieces.insert((rank, file), Piece::new(PieceType::Pawn, Color::Black));
                     }
-                    Rank::Eight => match square.file() {
-                        File::A => square.set_piece(Piece::new(PieceType::Rook, Color::Black)),
-                        File::B => square.set_piece(Piece::new(PieceType::Knight, Color::Black)),
-                        File::C => square.set_piece(Piece::new(PieceType::Bishop, Color::Black)),
-                        File::D => square.set_piece(Piece::new(PieceType::Queen, Color::Black)),
-                        File::E => square.set_piece(Piece::new(PieceType::King, Color::Black)),
-                        File::F => square.set_piece(Piece::new(PieceType::Bishop, Color::Black)),
-                        File::G => square.set_piece(Piece::new(PieceType::Knight, Color::Black)),
-                        File::H => square.set_piece(Piece::new(PieceType::Rook, Color::Black)),
-                    },
+                    Rank::Eight => {
+                        match file {
+                            File::A => pieces
+                                .insert((rank, file), Piece::new(PieceType::Rook, Color::Black)),
+                            File::B => pieces
+                                .insert((rank, file), Piece::new(PieceType::Knight, Color::Black)),
+                            File::C => pieces
+                                .insert((rank, file), Piece::new(PieceType::Bishop, Color::Black)),
+                            File::D => pieces
+                                .insert((rank, file), Piece::new(PieceType::Queen, Color::Black)),
+                            File::E => pieces
+                                .insert((rank, file), Piece::new(PieceType::King, Color::Black)),
+                            File::F => pieces
+                                .insert((rank, file), Piece::new(PieceType::Bishop, Color::Black)),
+                            File::G => pieces
+                                .insert((rank, file), Piece::new(PieceType::Knight, Color::Black)),
+                            File::H => pieces
+                                .insert((rank, file), Piece::new(PieceType::Rook, Color::Black)),
+                        };
+                    }
                     _ => {}
                 }
-                board.push(square)
             }
         }
 
-        println!("Board initialized with {} squares", board.len());
-        Self { squares: board }
+        Self { pieces: pieces }
     }
 
-    pub fn squares(&self) -> &Vec<Square> {
-        &self.squares
+    pub fn get_pieces(&self) -> &HashMap<(Rank, File), Piece> {
+        &self.pieces
     }
 
     pub fn to_fen_notation(&self) -> String {
@@ -62,33 +115,21 @@ impl Board {
         for rank in Rank::iter() {
             let mut rank_string = String::new();
             let mut empty_count = 0;
-
-            for square in self
-                .squares()
-                .iter()
-                .filter(|square| square.rank().to_int() == rank as u8)
-            {
-                match square.get_piece() {
-                    Some(piece) => {
-                        // If we had empty squares before this piece, add the count
-                        if empty_count > 0 {
-                            rank_string.push_str(&empty_count.to_string());
-                            empty_count = 0;
-                        }
-                        // Add the piece notation
-                        rank_string.push(piece.to_fen_notation());
+            for file in File::iter() {
+                if self.pieces.contains_key(&(rank, file)) {
+                    if empty_count > 0 {
+                        rank_string.push_str(&empty_count.to_string());
+                        empty_count = 0;
                     }
-                    None => {
-                        empty_count += 1;
-                    }
+                    let piece = self.pieces.get(&(rank, file));
+                    rank_string.push(piece.unwrap().to_fen_notation());
+                } else {
+                    empty_count += 1;
                 }
+            }
 
-                // If the rank ends with empty squares, add the count
-                if empty_count > 0 {
-                    rank_string.push_str(&empty_count.to_string());
-                }
-
-                // If we're at the end of a rank, push the rank string to the parts vector
+            if empty_count > 0 {
+                rank_string.push_str(&empty_count.to_string());
             }
 
             fen_parts.push(rank_string);
@@ -98,40 +139,21 @@ impl Board {
         fen_parts.join("/")
     }
 
-    pub fn get_square(&self, rank: Rank, file: File) -> &Square {
-        match &self
-            .squares
-            .iter()
-            .filter(|square| {
-                square.rank().to_int() == rank as u8 && square.file().to_int() == file as u8
-            })
-            .next()
-        {
-            Some(square) => square,
-            None => panic!("Square not found"),
-        }
+    pub fn get_pieces_mut(&mut self) -> &mut HashMap<(Rank, File), Piece> {
+        &mut self.pieces
     }
 
-    pub fn get_square_mut(&mut self, rank: Rank, file: File) -> &mut Square {
-        match self.squares.iter_mut().find(|square| {
-            square.rank().to_int() == rank as u8 && square.file().to_int() == file as u8
-        }) {
-            Some(square) => square,
-            None => panic!("Square not found at {:?}{:?}", file, rank),
-        }
-    }
+    // pub fn move_piece(&mut self, from_square: &mut Square, to_square: &mut Square) {
+    //     // TODO: Check if the to_square has a piece
+    //     // If so, handle collision
+    //     match from_square.get_piece() {
+    //         Some(piece) => {
+    //             let new_piece = Piece::new(*piece.piece_type(), *piece.color());
+    //             from_square.clear_piece();
 
-    pub fn move_piece(&mut self, from_square: &mut Square, to_square: &mut Square) {
-        // TODO: Check if the to_square has a piece
-        // If so, handle collision
-        match from_square.get_piece() {
-            Some(piece) => {
-                let new_piece = Piece::new(*piece.piece_type(), *piece.color());
-                from_square.clear_piece();
-
-                to_square.set_piece(new_piece);
-            }
-            None => {}
-        }
-    }
+    //             to_pieces.insert(new_piece);
+    //         }
+    //         None => {}
+    //     }
+    // }
 }
